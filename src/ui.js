@@ -142,13 +142,17 @@
     $("nextBtn").style.display = showNext ? "inline-block" : "none";
   }
   /* 出生漫画：4 格逐格点过，再抉择 */
-  var BIRTH_PANELS_ASIA = ["assets/panels/panel1-rainy-night.jpg", "assets/panels/panel2-corridor.jpg", "assets/panels/panel3-doctor.jpg", "assets/panels/panel4-dawn.jpg"];
-  var BIRTH_PANELS_EU = ["assets/panels/eu-panelA-rainy-night.jpg", "assets/panels/eu-panelB-doctor.jpg"];
+  var BIRTH_PANELS = {
+    asia: ["assets/panels/panel1-rainy-night.jpg", "assets/panels/panel2-corridor.jpg", "assets/panels/panel3-doctor.jpg", "assets/panels/panel4-dawn.jpg"],
+    eu: ["assets/panels/eu-panelA-rainy-night.jpg", "assets/panels/eu-panelC-corridor.jpg", "assets/panels/eu-panelB-doctor.jpg", "assets/panels/eu-panelD-dawn.jpg"],
+    lat: ["assets/panels/lat-panel1.jpg", "assets/panels/lat-panel2.jpg", "assets/panels/lat-panel3.jpg", "assets/panels/lat-panel4.jpg"],
+    sa: ["assets/panels/sa-panel1.jpg", "assets/panels/sa-panel2.jpg", "assets/panels/sa-panel3.jpg", "assets/panels/sa-panel4.jpg"]
+  };
   var BIRTH_CAPS = ["暴雨夜，妻子难产送医——父亲一路狂奔，冲进医院。", "产房外的走廊，钟走得格外慢，每一分钟都像一年。",
                     "医生：情况危急。保大人，还是保孩子？你必须马上决定。", "天快亮了。这一夜的选择，会跟着这个孩子走完一生。"];
   function startBirth() {
     clearBubbles();
-    var panels = G.region.pack === "eu" ? BIRTH_PANELS_EU : BIRTH_PANELS_ASIA;
+    var panels = BIRTH_PANELS[G.region.pack] || BIRTH_PANELS.asia;
     birthStep = 0;
     $("evtTitle").textContent = "样卡 001 · 出生 —— 难产";
     function showPanel() {
@@ -156,7 +160,7 @@
       var cap = BIRTH_CAPS[Math.min(birthStep, BIRTH_CAPS.length - 1)];
       setScene(p, cap);
       $("narr").innerHTML = "你尚未出生。这一夜的决定，由你的家人替你做。<span class='who'>（点下面按钮看下一格）</span>";
-      if (birthStep < panels.length - 1 + (panels === BIRTH_PANELS_EU ? 1 : 0) && birthStep < 3) {
+      if (birthStep < panels.length - 1 && birthStep < 3) {
         showChoices([{ t: "下一格 →" }], function () { birthStep++; showPanel(); });
       } else {
         $("narr").innerHTML = "医生把同意书递到父亲手里，笔尖在抖。<span class='who'>替父亲做决定：</span>";

@@ -8,7 +8,7 @@ var REGIONS = [
   { id:"sea", name:"东南亚 · 海岛渔村", pack:"asia", lang:"zh",
     boys:["阿南","巴颂","阿迪"], girls:["妮拉","玛雅","素丽"], surname:"海",
     place:"蓝礁村", fatherJob:"渔民", motherJob:"海产摊主", motif:"渔 港" },
-  { id:"sa",  name:"南亚 · 恒河平原城镇", pack:"asia", lang:"zh",
+  { id:"sa",  name:"南亚 · 恒河平原城镇", pack:"sa", lang:"zh",
     boys:["阿尔琼","罗希特","维克拉姆"], girls:["普里娅","卡维塔","安妮塔"], surname:"辛格",
     place:"巴特那", fatherJob:"布商", motherJob:"小学教师", motif:"河 原" },
   { id:"eu",  name:"西欧 · 巴伐利亚小镇", pack:"eu", lang:"en",
@@ -17,7 +17,7 @@ var REGIONS = [
   { id:"na",  name:"北美 · 中西部小镇", pack:"eu", lang:"en",
     boys:["Jack","Ethan","Noah"], girls:["Emma","Ava","Sophia"], surname:"Jack",
     place:"枫树镇", fatherJob:"农场主", motherJob:"图书管理员", motif:"原 野" },
-  { id:"lat", name:"拉丁美洲 · 安第斯山城", pack:"asia", lang:"es",
+  { id:"lat", name:"拉丁美洲 · 安第斯山城", pack:"lat", lang:"es",
     boys:["马特奥","圣地亚哥","迭戈"], girls:["卢西亚","瓦伦蒂娜","卡米拉"], surname:"加西亚",
     place:"昆卡", fatherJob:"陶匠", motherJob:"裁缝", motif:"山 城" }
 ];
