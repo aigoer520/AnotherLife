@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>异生 · Another Life（简易版 v0.1）</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #10151f; color: #e8e4da; min-height: 100vh; }
+  #app { max-width: 1080px; margin: 0 auto; padding: 14px 16px 40px; }
+  header.top { display: flex; align-items: baseline; gap: 14px; padding: 8px 2px 12px; border-bottom: 1px solid #2a3247; flex-wrap: wrap; }
+  header.top h1 { font-size: 24px; letter-spacing: 2px; color: #f2ead8; }
+  header.top .en { font-size: 13px; color: #8fa3c8; letter-spacing: 3px; }
+  header.top .ver { margin-left: auto; font-size: 12px; color: #5f6c86; }
+  /* 顶部数值细条 */
+  #statbar { display: none; padding: 10px 2px 4px; }
+  #statbar .row { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+  .stat { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #b9c2d4; }
+  .stat .bar { width: 64px; height: 6px; background: #232b3e; border-radius: 3px; overflow: hidden; }
+  .stat .bar i { display: block; height: 100%; background: linear-gradient(90deg, #7fb069, #d6c453); border-radius: 3px; }
+  .stat.low .bar i { background: #c0453e; }
+  #agebox { font-size: 14px; color: #f2ead8; margin-right: 6px; }
+  #agebox b { font-size: 19px; color: #ffd98a; }
+  .rel { font-size: 12px; color: #9fb4d8; }
+  /* 场景区 */
+  #scene { margin-top: 12px; background: #171d2b; border: 1px solid #2a3247; border-radius: 12px; overflow: hidden; }
+  #sceneImgWrap { position: relative; background: #0b0e14; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+  #sceneImgWrap img { width: 100%; max-height: 520px; object-fit: cover; display: block; }
+  #sceneMotif { font-size: 92px; color: #33405c; padding: 90px 0; letter-spacing: 10px; user-select: none; }
+  #sceneCap { position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 16px 10px; font-size: 13px; color: #cfd8ea;
+              background: linear-gradient(transparent, rgba(5,8,14,.88)); }
+  #narr { padding: 16px 18px 6px; font-size: 16.5px; line-height: 1.85; color: #ece7db; white-space: pre-wrap; }
+  #narr .who { color: #ffd98a; }
+  #evtTitle { padding: 14px 18px 0; font-size: 19px; color: #ffd98a; letter-spacing: 1px; }
+  #choices { padding: 12px 18px 18px; display: flex; flex-direction: column; gap: 9px; }
+  .choice { text-align: left; background: #1f2739; color: #e8e4da; border: 1px solid #35405a; border-radius: 9px;
+            padding: 11px 14px; font-size: 15px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .choice:hover { background: #2a3852; border-color: #ffd98a; transform: translateX(3px); }
+  .choice small { display: block; color: #93a3bf; font-size: 12.5px; margin-top: 3px; }
+  #nextBtn { margin: 4px 18px 18px; background: linear-gradient(180deg, #2e5d43, #24492f); color: #eaf5ec; border: 1px solid #3f7a56;
+             border-radius: 9px; padding: 12px 22px; font-size: 16px; cursor: pointer; letter-spacing: 2px; font-family: inherit; }
+  #nextBtn:hover { filter: brightness(1.2); }
+  /* 日志 */
+  #logwrap { margin-top: 14px; background: #141927; border: 1px solid #263049; border-radius: 12px; padding: 12px 16px; }
+  #logwrap h3 { font-size: 14px; color: #8fa3c8; letter-spacing: 2px; margin-bottom: 8px; }
+  #log { max-height: 220px; overflow-y: auto; font-size: 13.5px; line-height: 1.9; color: #aeb9cf; }
+  #log .yr { color: #ffd98a; margin-right: 8px; }
+  /* 开局生成器 */
+  .card { background: #171d2b; border: 1px solid #2a3247; border-radius: 12px; padding: 20px; margin-top: 14px; }
+  .card h2 { font-size: 19px; color: #ffd98a; margin-bottom: 6px; letter-spacing: 1px; }
+  .card p.sub { color: #93a3bf; font-size: 13.5px; line-height: 1.7; margin-bottom: 14px; }
+  .layer { margin-bottom: 16px; }
+  .layer .lt { font-size: 14px; color: #b9c2d4; margin-bottom: 8px; letter-spacing: 1px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .opt { background: #1f2739; border: 1px solid #35405a; color: #dfe5ef; border-radius: 20px; padding: 7px 15px; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .opt.sel { background: #2e5d43; border-color: #7fb069; color: #fff; }
+  .opt.rnd { border-style: dashed; color: #ffd98a; }
+  .bigbtn { background: linear-gradient(180deg, #8a5a2b, #6e4520); color: #fff3dd; border: 1px solid #c98f3d; border-radius: 10px;
+            padding: 13px 34px; font-size: 17px; letter-spacing: 3px; cursor: pointer; font-family: inherit; }
+  .bigbtn:hover { filter: brightness(1.15); }
+  #whoami { font-size: 15px; line-height: 2; color: #ece7db; background: #101623; border-radius: 9px; padding: 12px 16px; margin-bottom: 16px; display: none; }
+  #whoami b { color: #ffd98a; }
+  /* 总结 */
+  #summary { display: none; }
+  #summary .tomb { text-align: center; padding: 18px 0 8px; }
+  #summary .tomb .ttl { font-size: 27px; color: #ffd98a; letter-spacing: 3px; margin: 8px 0; }
+  #summary .tomb .age { font-size: 16px; color: #b9c2d4; }
+  #sumGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; font-size: 14.5px; line-height: 1.9; color: #cfd8ea; margin: 12px 0; }
+  #sumLog { font-size: 14px; line-height: 2; color: #aeb9cf; background: #101623; border-radius: 9px; padding: 14px 18px; }
+  .foot { margin-top: 16px; text-align: center; color: #55617a; font-size: 12px; line-height: 1.8; }
+  @media (max-width: 640px) { #sumGrid { grid-template-columns: 1fr; } #sceneMotif { font-size: 56px; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1>异生</h1><span class="en">ANOTHER LIFE</span>
+    <span class="ver">简易版 v0.1 · 一局一生</span>
+  </header>
+
+  <div id="statbar">
+    <div class="row" id="ageRow"></div>
+    <div class="row" id="statRow" style="margin-top:6px;"></div>
+  </div>
+
+  <!-- 开局 -->
+  <div id="setup" class="card">
+    <h2>这一生，从哪里开始？</h2>
+    <p class="sub">三层定起点：出生地、家庭出身、本人志向。每层可以点「随机」，也可以亲手选定。出生地同时锁定这一生的<b style="color:#ffd98a">长相包与语言包</b>（人物相貌、名字、称谓随出生地）。简易版时长固定为标准局（约 15～25 分钟）。</p>
+    <div id="whoami"></div>
+    <div class="layer"><div class="lt">第一层 · 出生地</div><div class="opts" id="optRegion"></div></div>
+    <div class="layer"><div class="lt">第二层 · 家庭出身</div><div class="opts" id="optWealth"></div></div>
+    <div class="layer"><div class="lt">第三层 · 本人志向</div><div class="opts" id="optAsp"></div></div>
+    <button class="bigbtn" id="startBtn">开始这一生</button>
+  </div>
+
+  <!-- 游戏主区 -->
+  <div id="stage" style="display:none;">
+    <div id="scene">
+      <div id="sceneImgWrap"><div id="sceneMotif">人 生</div><div id="sceneCap"></div></div>
+      <div id="evtTitle"></div>
+      <div id="narr"></div>
+      <div id="choices"></div>
+      <button id="nextBtn" style="display:none;">继 续 生 活</button>
+    </div>
+    <div id="logwrap"><h3>人 生 日 志</h3><div id="log"></div></div>
+  </div>
+
+  <!-- 总结 -->
+  <div id="summary" class="card">
+    <div class="tomb"><div style="font-size:15px;color:#8fa3c8;letter-spacing:4px;">落 幕</div>
+      <div class="ttl" id="sumTitle"></div><div class="age" id="sumAge"></div></div>
+    <div id="sumGrid"></div>
+    <h3 style="color:#8fa3c8;font-size:14px;letter-spacing:2px;margin:10px 0 6px;">一生回顾</h3>
+    <div id="sumLog"></div>
+    <div style="text-align:center;margin-top:20px;"><button class="bigbtn" id="againBtn">再来一局 · 另一个人生</button></div>
+  </div>
+
+  <div class="foot">异生 · Another Life（简易版 v0.1）<br>出生与死亡之间，都是你的选择。</div>
+</div>
+
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
