@@ -171,6 +171,15 @@
         ], function (i) {
           startWait();
           var res = birthChoice(G, i);
+          if (!G.alive) { /* 保产妇：孩子离世，本局直接落幕 */
+            stopWait();
+            $("evtTitle").textContent = "这一世，没能开始";
+            setScene(panels[panels.length - 1], "");
+            $("narr").textContent = res;
+            renderStats(); renderLog();
+            showChoices([{ t: "落 幕" }], function () { die(); });
+            return;
+          }
           $("evtTitle").textContent = "你出生了";
           setScene(panels[panels.length - 1], "");
           $("narr").textContent = res + "\n\n你好，" + G.name + "。这一生，开始了。";
@@ -261,11 +270,25 @@
       clearChoices(true); renderStats(); renderLog();
     });
   }
+  /* 寿数评级：这游戏的目的就是看你能活多久 */
+  function longevityLabel(age) {
+    age = Math.floor(age);
+    if (age < 1) return "未及人世";
+    if (age < 18) return "夭折";
+    if (age < 40) return "英年早逝";
+    if (age < 60) return "中年而逝";
+    if (age < 75) return "寿终正寝";
+    if (age < 90) return "长寿";
+    if (age < 100) return "高寿";
+    return "期颐 · 人瑞";
+  }
   function die() {
     $("setup").style.display = "none"; $("stage").style.display = "none";
     var s = $("summary"); s.style.display = "block";
     $("sumTitle").textContent = lifeTitle(G);
     $("sumAge").textContent = G.name + " · 终年 " + Math.floor(G.age) + " 岁 · " + G.cause + " · 出生于" + G.region.name;
+    var lv = longevityLabel(G.age);
+    $("sumAge").textContent += " · 寿数评级：" + lv;
     $("sumGrid").innerHTML =
       "<div>健康 " + G.st.hp + "　智力 " + G.st.iq + "　魅力 " + G.st.ch + "</div>" +
       "<div>财富 " + G.st.we + "　幸福 " + G.st.ha + "　声望 " + G.st.fa + "</div>" +

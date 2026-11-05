@@ -28,12 +28,15 @@ function deathRisk(age, hp, years) {
   var h;
   if (age < 18) h = 0.0008;
   else h = 0.00045 * Math.exp(Math.max(0, age - 20) / 12.5);
+  h = Math.max(h, 0.0007); /* 无常地板：人随时都会死——与年龄无关的意外/急病风险 */
   if (hp < 30) h *= 2.2; if (hp < 15) h *= 4; if (hp <= 0) return 1;
   if (age >= 105) h = Math.max(h, 0.45);
   return Math.min(1, 1 - Math.exp(-h * (years || 2.5)));
 }
+var SUDDEN = ["一场突如其来的车祸", "一场毫无征兆的急病", "一次谁也没料到的意外", "一场急病（心源性猝死）"];
 function causeOf(g) {
   if (g.st.hp <= 5) return "病逝";
+  if (g.age < 55 && g.st.hp >= 50 && Math.random() < 0.55) return SUDDEN[Math.floor(Math.random() * SUDDEN.length)];
   if (g.age < 40 && Math.random() < 0.3) return "意外离世";
   if (g.age >= 75) return "寿终正寝";
   return "病逝";
@@ -45,10 +48,10 @@ function birthChoice(g, idx) {
     g.motherAlive = false; applyFx(g, { hp: 3, fam: -12, ha: -6 });
     g.log.push({ age: 0, text: "难产之夜，家人选择拼尽全力保你——母亲没能挺过来。你在没有母亲的家里长大，这件事成年后才知道。" });
     return "产房的灯亮了一整夜。天亮时，你活了下来，母亲走了。";
-  } else if (idx === 1) { /* 保产妇 */
-    g.frail = true; applyFx(g, { hp: -14, fam: 10, ha: 2 });
-    g.log.push({ age: 0, text: "难产之夜，家人选择先保母亲。你活了下来，但自小体弱多病。" });
-    return "医生先保住了母亲。你也活了下来，只是身子骨从小就弱。";
+  } else if (idx === 1) { /* 保产妇：母亲活，孩子没能来到这个世界——本局结束 */
+    g.alive = false; g.cause = "难产";
+    g.log.push({ age: 0, text: "难产之夜，家人选择先保母亲。母亲活了下来，而你没能来到这个世界。" });
+    return "医生先保住了母亲。产房里安静下来——这一世，你没能开始。";
   } else { /* 送大医院 */
     applyFx(g, { hp: 6, we: -14, fam: 4 });
     if (g.st.we < 15) g.st.we = 15;
@@ -85,6 +88,12 @@ function doChoice(g, ev, idx) {
   if (c.set) for (var k in c.set) g.life[k] = c.set[k];
   g.lastChoiceIdx = idx; g.lastEventTitle = ev.title;
   applyFx(g, c.fx); g.choices++;
+  /* 致命风险：选不慎可能当场丧命——人生不是一直能活下去 */
+  if (c.risk && Math.random() < c.risk) {
+    g.alive = false; g.cause = c.deathCause || "意外";
+    g.log.push({ age: Math.floor(g.age), text: c.deathLog });
+    return c.deathLog;
+  }
   g.log.push({ age: Math.floor(g.age), text: c.log });
   return c.log;
 }
@@ -104,6 +113,7 @@ function advance(g) {
 }
 function lifeTitle(g) {
   var s = g.st;
+  if (g.age < 1) return "未曾开始的一生";
   if (g.age >= 90) return "长寿圆满 · 人瑞";
   if (s.fa >= 78) return "声名远扬的一生";
   if (s.we >= 85) return "富甲一方的一生";
@@ -117,7 +127,7 @@ function lifeTitle(g) {
 /* 无界面自动模拟：随机一局，返回终年 */
 function simulateOne() {
   var g = newGame(pick(REGIONS), pick(WEALTHS), pick(ASPS), Math.random() < 0.5 ? "m" : "f");
-  birthChoice(g, ri(0, 2));
+  birthChoice(g, Math.random() < 0.5 ? 0 : 2);
   var guard = 0;
   while (g.alive && guard++ < 500) {
     if (advance(g)) break;
