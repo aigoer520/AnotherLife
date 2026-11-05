@@ -7,7 +7,8 @@ function newGame(rg, wl, asp, gender) {
     st: { hp: 62 + (wl.hp||0) + (asp.hp||0), iq: 50 + (asp.iq||0) + (wl.iq||0),
           ch: 50 + (asp.charm||0), we: wl.wealth, ha: 55 + (asp.happy||0), fa: 30 },
     rel: { fam: 70, fri: 40, lov: 0 },
-    seen: {}, log: [], born: false, motherAlive: true, frail: false
+    seen: {}, log: [], born: false, motherAlive: true, frail: false,
+    life: { school: true, work: false, married: false, kids: false, away: false, house: false }
   };
   g.log.push({ age: 0, text: "你出生在" + rg.place + "，父亲是" + rg.fatherJob + "，母亲是" + rg.motherJob + "，家境" + wl.name + "。" });
   return g;
@@ -55,14 +56,21 @@ function birthChoice(g, idx) {
     return "连夜的转院救了两个人。天亮时母子平安，只是家里的积蓄见了底。";
   }
 }
+/* 事件/选项条件检查：req 里每个 状态键:期望值 都要与 g.life 对上（期望 false 表示「该状态不成立才行」） */
+function condPass(g, req) {
+  if (!req) return true;
+  for (var k in req) { if (!!g.life[k] !== !!req[k]) return false; }
+  return true;
+}
 function pickEvent(g) {
   var stg = stageOf(g.age); g.stage = stg;
-  /* 志向事件：青年/中年各最多触发一次 */
+  /* 志向事件：青年/中年各最多触发一次（创业事件要求未婚单干者不成立即可——打工者/创业者都可，需在工作） */
   var ae = ASP_EVENTS[g.asp.id];
-  if (ae && (stg === 2 || stg === 3) && !g.seen["asp"] && Math.random() < 0.4) { g.seen["asp"] = 1; return Object.assign({ aspEv: true }, ae); }
+  if (ae && (stg === 2 || stg === 3) && !g.seen["asp"] && g.life.work && Math.random() < 0.4) { g.seen["asp"] = 1; return Object.assign({ aspEv: true }, ae); }
   var pool = EVENTS.filter(function (e) {
     if (e.st !== stg || g.seen[e.title]) return false;
     if (e.cond && g.age < e.cond.minAge) return false;
+    if (!condPass(g, e.req)) return false;
     return true;
   });
   if (pool.length && Math.random() < 0.78) { var e = pick(pool); g.seen[e.title] = 1; return e; }
@@ -74,6 +82,8 @@ function pickEvent(g) {
 function doChoice(g, ev, idx) {
   var c = ev.ch[idx]; if (!c) return "";
   if (c.condAsp && g.asp.id !== c.condAsp) { /* 不合志向的选项降级为普通效果 */ }
+  if (c.set) for (var k in c.set) g.life[k] = c.set[k];
+  g.lastChoiceIdx = idx; g.lastEventTitle = ev.title;
   applyFx(g, c.fx); g.choices++;
   g.log.push({ age: Math.floor(g.age), text: c.log });
   return c.log;
