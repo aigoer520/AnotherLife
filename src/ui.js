@@ -62,6 +62,28 @@
     }).join("");
   }
   var waitTimer = null;
+  /* 风土卡图包：开局选定后立刻后台拉取（12 张小图），存本局缓存随时取用 */
+  var cardPool = []; /* [{url, text}] 按卡序存，文字随图走 */
+  function cardUrl(i) {
+    var p = "anime style cinematic illustration. " + LOCALE_IMG[G.region.id][i] +
+      ". No people close-up, wide scenery shot. Atmospheric lighting, muted colors, no text.";
+    return "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) +
+      "?width=768&height=432&seed=" + (1000 + i * 137) + "&nologo=true";
+  }
+  function prefetchCards() {
+    cardPool = [];
+    var prompts = LOCALE_IMG[G.region.id] || [];
+    var texts = LOCALE_CARDS[G.region.id] || [];
+    var n = Math.min(12, prompts.length);
+    for (var i = 0; i < n; i++) {
+      (function (idx) {
+        var url = cardUrl(idx);
+        var im = new Image();
+        im.onload = function () { cardPool.push({ url: url, text: texts[idx % texts.length] }); };
+        im.src = url;
+      })(i);
+    }
+  }
   function stopWait() { if (waitTimer) { clearInterval(waitTimer); waitTimer = null; } }
   function startWait() {
     stopWait();
@@ -70,8 +92,25 @@
     var cards = (LOCALE_CARDS[G.region.id] || []).slice();
     var ci = Math.floor(Math.random() * cards.length);
     var flip = false;
+    function showText(txt) {
+      var w = $("sceneImgWrap");
+      w.querySelectorAll("img").forEach(function (i) { i.remove(); });
+      var m = $("sceneMotif"); m.style.display = "block"; m.textContent = G.region.motif;
+      cap.textContent = "正在生成相应图片，请等待……\n" + txt;
+    }
     function tick() {
-      cap.textContent = "正在生成相应图片，请等待……\n" + (flip ? cards[ci++ % cards.length] : QUOTES[qi++ % QUOTES.length]);
+      if (flip && cardPool.length) {
+        /* 风土卡：已存好的图 + 随图的风土文字 */
+        var item = cardPool[ci++ % cardPool.length];
+        var w = $("sceneImgWrap");
+        w.querySelectorAll("img").forEach(function (i) { i.remove(); });
+        var im = document.createElement("img"); im.src = item.url; im.alt = "";
+        w.insertBefore(im, w.firstChild);
+        $("sceneMotif").style.display = "none";
+        cap.textContent = "正在生成相应图片，请等待……\n" + item.text;
+      } else {
+        showText(QUOTES[qi++ % QUOTES.length]);
+      }
       flip = !flip;
     }
     tick();
@@ -202,7 +241,7 @@
     G = newGame(s.region, s.wealth, s.asp, Math.random() < 0.5 ? "m" : "f");
     $("setup").style.display = "none";
     $("stage").style.display = "block"; $("statbar").style.display = "block";
-    renderStats(); renderLog(); startBirth();
+    renderStats(); renderLog(); startBirth(); prefetchCards();
   };
   $("nextBtn").onclick = function () { startWait(); step(); };
   $("againBtn").onclick = function () { location.reload(); };
