@@ -108,6 +108,7 @@
           { t: "B 保产妇", hint: "先保住母亲，孩子自小体弱" },
           { t: "C 拼一把，连夜送大医院", hint: "两个都保的机会最大，家底掏空" }
         ], function (i) {
+          $("sceneCap").textContent = "正在生成相应图片，请等待……";
           var res = birthChoice(G, i);
           $("evtTitle").textContent = "你出生了";
           setScene(panels[panels.length - 1], "");
@@ -141,7 +142,7 @@
     var url = sceneUrlFor(ev);
     if (!url) { setScene(null, "", ev.motif || G.region.motif); return; }
     if (imgCache[url]) { setScene(url, ""); return; }
-    setScene(null, "这一幕的插图正在联网生成，稍等几秒……", ev.motif || G.region.motif);
+    setScene(null, "正在生成相应图片，请等待……", ev.motif || G.region.motif);
     var my = ++sceneSeq;
     var im = new Image();
     im.onload = function () { imgCache[url] = 1; if (my === sceneSeq) setScene(url, ""); };
@@ -186,7 +187,7 @@
     $("stage").style.display = "block"; $("statbar").style.display = "block";
     renderStats(); renderLog(); startBirth();
   };
-  $("nextBtn").onclick = step;
+  $("nextBtn").onclick = function () { $("sceneCap").textContent = "正在生成相应图片，请等待……"; step(); };
   $("againBtn").onclick = function () { location.reload(); };
 })();
 /* 自检钩子：#auto 自动玩完一局（供无头截图/冒烟测试，正常游玩无影响） */
