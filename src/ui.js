@@ -118,6 +118,36 @@
     }
     showPanel();
   }
+  /* 联网生成情景插图：选完人生、事件出现时才按需生成（只生成这一局遇到的），失败回退文字场景 */
+  var imgCache = {}, sceneSeq = 0;
+  function personPhrase() {
+    var st = stageOf(G.age), f = G.gender === "f";
+    return ["a small child with young parents", f ? "a teenage girl" : "a teenage boy",
+            f ? "a young woman" : "a young man", f ? "a middle-aged woman" : "a middle-aged man",
+            f ? "an older woman with grey hair" : "an older man with grey hair",
+            f ? "a very old woman" : "a very old man"][st];
+  }
+  function sceneUrlFor(ev) {
+    var base = IMG_PROMPTS[ev.title]; if (!base) return null;
+    var prompt = "anime style cinematic illustration. " + base + ". Setting: " + REGION_IMG[G.region.id] +
+      ". Main figure: " + personPhrase() + ", " + REGION_LOOK[G.region.id] +
+      ", seen from behind or in silhouette, face not visible. Atmospheric lighting, muted colors, no text.";
+    var h = 7, key = ev.title + "|" + G.region.id + "|" + G.gender;
+    for (var i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) % 100000;
+    return "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) +
+      "?width=1024&height=576&seed=" + h + "&nologo=true";
+  }
+  function setSceneForEvent(ev) {
+    var url = sceneUrlFor(ev);
+    if (!url) { setScene(null, "", ev.motif || G.region.motif); return; }
+    if (imgCache[url]) { setScene(url, ""); return; }
+    setScene(null, "这一幕的插图正在联网生成，稍等几秒……", ev.motif || G.region.motif);
+    var my = ++sceneSeq;
+    var im = new Image();
+    im.onload = function () { imgCache[url] = 1; if (my === sceneSeq) setScene(url, ""); };
+    im.onerror = function () { if (my === sceneSeq) setScene(null, "", ev.motif || G.region.motif); };
+    im.src = url;
+  }
   function step() {
     if (!G.alive) return;
     if (advance(G)) { renderStats(); renderLog(); return die(); }
@@ -125,7 +155,7 @@
     renderStats();
     if (!curEv) { $("evtTitle").textContent = ""; $("narr").textContent = "日子平平静静地往前走……"; setScene(null, "", G.region.motif); clearChoices(true); return; }
     $("evtTitle").textContent = curEv.title;
-    setScene(null, "", curEv.motif || G.region.motif);
+    setSceneForEvent(curEv);
     $("narr").textContent = curEv.scene;
     var chs = curEv.ch.filter(function (c) { return !c.condAsp || c.condAsp === G.asp.id || true; });
     showChoices(chs.map(function (c) { return { t: c.t }; }), function (i) {

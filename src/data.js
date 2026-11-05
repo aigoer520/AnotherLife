@@ -172,4 +172,52 @@ var ASP_EVENTS = {
     ch:[ {t:"签！苛刻也接", fx:{we:12,fa:4,hp:-3}, log:"你咬牙接下大订单，公司活了过来。"},
          {t:"条件太苛，忍痛放弃", fx:{we:-2,ha:-2,iq:2}, log:"你放弃了苛刻的大订单，等来了更合适的。"} ] }
 };
+
+/* ---------- 联网生图：地区画面描述 + 事件提示词（英文，人物背影/剪影以避开面孔一致性问题） ---------- */
+var REGION_IMG = {
+  ea: "a small city in China", sea: "an island fishing village in Southeast Asia",
+  sa: "a town on the Ganges plain in India", eu: "a small town in Bavaria, Germany",
+  na: "a small town in the American Midwest", lat: "a mountain town in the Andes, Latin America"
+};
+var REGION_LOOK = {
+  ea: "East Asian appearance, black hair", sea: "Southeast Asian appearance, tan skin, black hair",
+  sa: "South Asian appearance, brown skin, black hair", eu: "European appearance, fair skin, light brown hair",
+  na: "North American appearance", lat: "Latin American appearance, tan skin, dark hair"
+};
+var IMG_PROMPTS = {
+  "学前班的名额": "a small kindergarten entrance, a mother holding a toddler looking at children playing inside, morning light",
+  "一场高烧": "a father carrying a feverish child on his back, running through heavy rain at night toward a distant clinic light",
+  "父母的争吵": "a small child peeking through a doorway at parents arguing in a dim kitchen, tense quiet atmosphere",
+  "校园里的拳头": "a schoolyard at dusk, a lone student with a torn backpack facing a group of older students",
+  "第一次心动": "two students at adjacent desks in a sunlit classroom, golden afternoon light through the windows, shy tender mood",
+  "升学还是辍学": "a crossroads at dawn, one road leading to a school building, the other to a factory with chimneys",
+  "恩师的一句话": "a kind teacher handing a graded notebook to a student in an empty classroom, warm light",
+  "进城的第一份工": "a young migrant worker with a duffel bag standing before a large factory gate at dawn",
+  "离乡的车票": "a young traveler with a suitcase on a misty train station platform, a train arriving",
+  "第一份工作被裁": "an office worker carrying a cardboard box of belongings out of an office building in light rain",
+  "恋爱与面包": "a young couple talking seriously at a small candlelit table in a modest apartment, city lights outside the window",
+  "工友的婚事": "coworkers celebrating at a simple wedding banquet in a workers canteen with red decorations",
+  "移民的机会": "a person looking at a large world map on the wall, a contract and a pen on the desk, thoughtful mood",
+  "房贷与育儿": "a tired young father holding a newborn baby outside a hospital nursery window at night",
+  "父母病了": "an adult sitting beside a hospital bed holding an elderly parent hand, soft evening light",
+  "一个人的晚饭": "a person eating instant noodles alone in a small rented apartment at night, phone glowing on the table",
+  "中年危机": "a middle-aged driver sitting alone in a parked car at dusk, city lights reflecting on the windshield",
+  "老友的求助": "two old friends at a small tea table, one looking troubled, the other listening quietly",
+  "退休那天": "a newly retired worker holding an enamel mug, walking out of a workplace gate into sunset light",
+  "子女远行": "elderly parents waving goodbye to their adult child in an airport departure hall, morning light through glass",
+  "投资被骗": "an elderly person holding crumpled investment papers in a dim room, a silent phone on the table",
+  "老工友的聚会": "elderly retired workers laughing together at a reunion dinner, old photographs spread on the table",
+  "老伴先走一步": "an elderly person sitting alone at home beside an empty chair, television glow, quiet grief",
+  "立遗嘱": "an elderly person signing a will at a desk while adult children stand around, solemn quiet room",
+  "回望故土": "an elderly person returning to an old childhood house under a big old tree, nostalgic afternoon light",
+  "写回忆录": "an elderly person writing a memoir by hand at a wooden desk under lamplight, grandchildren listening nearby",
+  "告别的方式": "an old person standing on a hill at sunrise looking at distant mountains, peaceful dignified farewell",
+  "一笔意外之财": "a surprised happy person holding a winning lottery ticket at a small shop counter",
+  "一场大病预警": "a person reading a medical report with red warning marks in a clinic waiting room, worried mood",
+  "故人重逢": "two old friends meeting by chance on a street corner far from home, surprised and joyful",
+  "时代的风口": "people looking toward a rising new industrial skyline at dawn, wind blowing, hopeful energy",
+  "实验室的深夜": "a scientist alone in a laboratory late at night, glowing data screens, dawn breaking outside the window",
+  "一个人的远方": "a lone traveler with a map standing before a vast horizon at golden hour, mountains far away",
+  "第一笔大订单": "a young entrepreneur signing a big contract in a small office, tense and hopeful"
+};
 /* ================= ENGINE END ================= */
