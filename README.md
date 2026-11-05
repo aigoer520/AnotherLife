@@ -22,14 +22,15 @@
 
 设计文档在 [`docs/`](docs/)：对齐方案、主线故事梳理、样卡图。
 
-## 怎么运行（简易版）
+## 怎么玩 / 怎么运行
 
-直接用浏览器打开 `src/index.html` 即可游玩（无需服务器、无需联网）。
+- **玩家**：去 [Releases](../../releases) 下载 Windows 版 zip，解压后双击 `AnotherLife.exe`——独立窗口的程序版，免安装、不联网（打包方法见 [`packaging/打包说明.md`](packaging/打包说明.md)）。
+- **开发者**：直接用浏览器打开 `src/index.html` 即可调试游玩（无需服务器、无需联网）。
 
-打包单文件玩家版：
+打包单文件本体：
 
 ```bash
-python3 tools/build-standalone.py   # 生成 dist/yisheng.html（图片内嵌，单文件分发）
+python3 tools/build-standalone.py   # 生成 dist/yisheng.html（图片内嵌，供打包与调试）
 ```
 
 ## 参与进来
