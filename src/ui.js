@@ -147,6 +147,7 @@
   var BIRTH_CAPS = ["暴雨夜，妻子难产送医——父亲一路狂奔，冲进医院。", "产房外的走廊，钟走得格外慢，每一分钟都像一年。",
                     "医生：情况危急。保大人，还是保孩子？你必须马上决定。", "天快亮了。这一夜的选择，会跟着这个孩子走完一生。"];
   function startBirth() {
+    clearBubbles();
     var panels = G.region.pack === "eu" ? BIRTH_PANELS_EU : BIRTH_PANELS_ASIA;
     birthStep = 0;
     $("evtTitle").textContent = "样卡 001 · 出生 —— 难产";
@@ -205,19 +206,52 @@
     im.onerror = function () { if (my === sceneSeq) setScene(null, "", ev.motif || G.region.motif); };
     im.src = url;
   }
+  /* 对话气泡渲染：lines 有则贴说话人身边；无则主角独白（事件首句）+ 旁白沉底 */
+  function splitScene(t) {
+    var m = t.split(/(?<=[。！？])\s*/);
+    if (m.length >= 2) return [m[0], m.slice(1).join("")];
+    return [t, ""];
+  }
+  function renderBubbles(ev) {
+    var box = $("bubbles"); box.innerHTML = "";
+    var narrEl = $("sceneNarr");
+    var posCycle = ["b-l", "b-r", "b-l", "b-r"];
+    if (ev.lines && ev.lines.length) {
+      ev.lines.forEach(function (L, i) {
+        var b = document.createElement("div");
+        b.className = "bubble " + (L.pos || posCycle[i % 4]);
+        b.innerHTML = "<span class='cloud'></span><span class='who'>" + L.who + "</span>" + L.text + "<span class='tail'></span>";
+        box.appendChild(b);
+      });
+      narrEl.style.display = "block";
+      narrEl.innerHTML = "<span class='ntag'>旁白</span>" + ev.scene;
+    } else {
+      var parts = splitScene(ev.scene);
+      var b = document.createElement("div");
+      b.className = "bubble b-c";
+      b.innerHTML = "<span class='cloud'></span><span class='who'>" + G.name + " · 心声</span>" + parts[0] + "<span class='tail'></span>";
+      box.appendChild(b);
+      if (parts[1]) { narrEl.style.display = "block"; narrEl.innerHTML = "<span class='ntag'>旁白</span>" + parts[1]; }
+      else narrEl.style.display = "none";
+    }
+    $("narr").textContent = "";
+  }
+  function clearBubbles() { $("bubbles").innerHTML = ""; $("sceneNarr").style.display = "none"; }
   function step() {
     if (!G.alive) return;
     if (advance(G)) { renderStats(); renderLog(); return die(); }
     curEv = pickEvent(G);
     renderStats();
-    if (!curEv) { $("evtTitle").textContent = ""; $("narr").textContent = "日子平平静静地往前走……"; setScene(null, "", G.region.motif); clearChoices(true); return; }
+    if (!curEv) { $("evtTitle").textContent = ""; clearBubbles(); $("narr").textContent = "日子平平静静地往前走……"; setScene(null, "", G.region.motif); clearChoices(true); return; }
     $("evtTitle").textContent = curEv.title;
+    renderBubbles(curEv);
     setSceneForEvent(curEv);
     $("narr").textContent = curEv.scene;
     var chs = curEv.ch.filter(function (c) { return !c.condAsp || c.condAsp === G.asp.id || true; });
     showChoices(chs.map(function (c) { return { t: c.t }; }), function (i) {
       var realIdx = curEv.ch.indexOf(chs[i]);
       var res = doChoice(G, curEv, realIdx);
+      clearBubbles();
       $("narr").textContent = res;
       $("evtTitle").textContent = "";
       clearChoices(true); renderStats(); renderLog();
